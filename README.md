@@ -1,2 +1,2 @@
-# Scripts_for_ani2x_jtct_paper
-Placeholder for the scripts and data for the JCTC ANI-2x paper.
+# ani-2x_results
+Code to recreate the results in the ANI-2x publication
