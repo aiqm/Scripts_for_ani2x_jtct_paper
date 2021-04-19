@@ -1,4 +1,3 @@
-import write_class as wc
 import torch
 import torchani
 import pandas as pd
@@ -8,6 +7,39 @@ from torchani.units import HARTREE_TO_KCALMOL
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+def read_xyz(file):
+    import numpy as np
+    xyz = []
+    typ = []
+    Na = []
+    ct = []
+    fd = open(file, 'r').read()
+    rb = re.compile('(\d+?)\n(.*?)\n((?:[A-Z][a-z]?.+?(?:\n|$))+)')
+    ra = re.compile(
+        '([A-Z][a-z]?)\s+?([-+]?\d+?\.\S+?)\s+?([-+]?\d+?\.\S+?)\s+?([-+]?\d+?\.\S+?)\s*?(?:\n|$)'
+    )
+    s = rb.findall(fd)
+    Nc = len(s)
+    if Nc == 0:
+        raise ValueError('No coordinates found in file. Check formatting of ' +
+                         file + '.')
+    for i in s:
+        X = []
+        T = []
+        ct.append(i[1])
+        c = ra.findall(i[2])
+        Na.append(len(c))
+        for j in c:
+            T.append(j[0])
+            X.append(j[1])
+            X.append(j[2])
+            X.append(j[3])
+        X = np.array(X, dtype=np.float32)
+        X = X.reshape(len(T), 3)
+        xyz.append(X)
+        typ.append(T)
+
+    return xyz, typ, Na, ct
 
 def calculaterootmeansqrerror(data1, data2, axis=0):
     data = np.power(data1 - data2, 2)
@@ -28,7 +60,7 @@ molecules = ['cysteine_dipeptide', 'DDT', 'hexafluoroacetone', 'bendamustine']
 
 for mol in molecules:
     fa = mol + '.xyz'
-    X, S, Na, ct = wc.read_xyz('xyzs/aniopt/' + fa)
+    X, S, Na, ct = read_xyz('xyzs/aniopt/' + fa)
     df = pd.read_csv(mol + '.csv')
     ani_energies = []
     for xi, si in zip(X, S):
