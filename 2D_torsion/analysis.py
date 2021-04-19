@@ -3,12 +3,12 @@ import torchani
 import pandas as pd
 import numpy as np
 import plot_code as pto
+import re
 from torchani.units import HARTREE_TO_KCALMOL
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def read_xyz(file):
-    import numpy as np
     xyz = []
     typ = []
     Na = []
